@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk Certificate Generator - Management Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+  <!-- ======================================================== -->
+  <!-- LOGIN SCREEN (Displays when unauthenticated)             -->
+  <!-- ======================================================== -->
+  <div id="login-screen" class="login-screen" style="display: none;">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo-icon">🎓</div>
+        <h2>Bulk Certificate Generator</h2>
+        <p>Enterprise Administration Portal</p>
+      </div>
+
+      <!-- Quick Demo Credentials Box -->
+      <div class="demo-credentials-box">
+        <div class="demo-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          Demo Credentials
+        </div>
+        <div class="demo-fields">
+          <div><span>Username:</span> <strong>admin</strong> (or <strong>admin@example.com</strong>)</div>
+          <div><span>Password:</span> <strong>admin123</strong></div>
+        </div>
+        <button type="button" id="btn-fill-demo" class="btn-fill-demo">⚡ Fill Demo Credentials</button>
+      </div>
+
+      <form id="login-form" class="login-form">
+        <div id="login-error" class="login-error" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+          <span id="login-error-text">Invalid username or password</span>
+        </div>
+
+        <div class="form-group">
+          <label for="login-username">Username or Email</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <input type="text" id="login-username" class="form-control" placeholder="admin or email" required
+              autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required
+              autocomplete="current-password">
+            <button type="button" id="btn-toggle-password" class="btn-toggle-pw" title="Toggle password visibility">
+              <svg id="pw-eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg id="pw-eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" style="display:none;">
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="login-options">
+          <label class="remember-me">
+            <input type="checkbox" id="login-remember" checked>
+            <span>Remember me</span>
+          </label>
+          <span style="font-size:12px; color:#64748b;">Role: Administrator</span>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-login-submit">
+          <span>Sign In to Dashboard</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- AUTHENTICATED APP LAYOUT                                 -->
+  <!-- ======================================================== -->
+  <div id="app-layout" class="app-layout">
+
+    <!-- Left Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🎓</div>
+        <div class="sidebar-brand">
+          Bulk Certificate
+          <span>Generator System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg viewBox="0 0 24 24">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+          Dashboard
+        </a>
+        <a class="nav-item" data-view="bulk-gen" id="nav-bulk-gen">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="12" y1="18" x2="12" y2="12" />
+            <line x1="9" y1="15" x2="15" y2="15" />
+          </svg>
+          Bulk Generation
+        </a>
+        <a class="nav-item" data-view="job-status" id="nav-job-status">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Job Status & Progress
+        </a>
+        <a class="nav-item" data-view="certificates" id="nav-certificates">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+          Certificates
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-item nav-logout" id="btn-logout" type="button" title="Sign out of dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main View Area -->
+    <main class="main-wrapper">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-title-wrap">
+          <h1 id="header-title">Dashboard</h1>
+          <p id="header-desc">Overview of certificate generation stats and system activity</p>
+        </div>
+
+        <div class="header-actions">
+          <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <span class="user-name">Admin</span>
+              <span class="user-role">Administrator</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Body -->
+      <div class="content-body">
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 1: Dashboard View                                 -->
+        <!-- ======================================================== -->
+        <section id="view-dashboard" class="view-section active">
+          <!-- 4 Stat KPI Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Jobs</span>
+                <div class="stat-icon blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="8" height="4" x="8" y="2" rx="1" />
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  </svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-total-jobs">0</div>
+              <div class="stat-subtext positive">↑ +2 this week</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Certificates</span>
+                <div class="stat-icon green">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-total-certs">0</div>
+              <div class="stat-subtext positive">↑ +180 this week</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Failed Certificates</span>
+                <div class="stat-icon red">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-failed-certs">0</div>
+              <div class="stat-subtext negative">↓ -4% from last week</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Certificates Issued</span>
+                <div class="stat-icon purple">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-issued-certs">0</div>
+              <div class="stat-subtext positive" id="stat-rate-text">98% success rate</div>
+            </div>
+          </div>
+
+          <!-- Middle Row: Donut Chart & Activity -->
+          <div class="dashboard-mid-grid">
+            <!-- Job Status Overview Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Job Status Overview</h3>
+              </div>
+              <div class="card-body">
+                <div class="donut-container">
+                  <svg class="donut-chart-svg" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f1f5f9" stroke-width="16" />
+                    <circle id="donut-circle-completed" cx="60" cy="60" r="50" fill="none" stroke="#10b981"
+                      stroke-width="16" stroke-dasharray="0 314" />
+                    <circle id="donut-circle-processing" cx="60" cy="60" r="50" fill="none" stroke="#2563eb"
+                      stroke-width="16" stroke-dasharray="0 314" />
+                    <circle id="donut-circle-queued" cx="60" cy="60" r="50" fill="none" stroke="#f59e0b"
+                      stroke-width="16" stroke-dasharray="0 314" />
+                    <circle id="donut-circle-failed" cx="60" cy="60" r="50" fill="none" stroke="#ef4444"
+                      stroke-width="16" stroke-dasharray="0 314" />
+                    <g transform="rotate(90 60 60)">
+                      <text x="60" y="58" text-anchor="middle" class="donut-center-text"
+                        id="donut-center-total">0</text>
+                      <text x="60" y="74" text-anchor="middle" class="donut-sub-text">Total Jobs</text>
+                    </g>
+                  </svg>
+
+                  <div class="chart-legend">
+                    <div class="legend-item">
+                      <div class="legend-info">
+                        <span class="legend-dot completed"></span>
+                        <span>Completed (100% Pass)</span>
+                      </div>
+                      <div>
+                        <span class="legend-count" id="legend-completed-count">0</span>
+                        <span class="legend-pct" id="legend-completed-pct">(0%)</span>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-info">
+                        <span class="legend-dot" style="background-color:#d97706;"></span>
+                        <span>Partial (Some Failed)</span>
+                      </div>
+                      <div>
+                        <span class="legend-count" id="legend-partial-count">0</span>
+                        <span class="legend-pct" id="legend-partial-pct">(0%)</span>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-info">
+                        <span class="legend-dot failed"></span>
+                        <span>Failed (All Failed)</span>
+                      </div>
+                      <div>
+                        <span class="legend-count" id="legend-failed-count">0</span>
+                        <span class="legend-pct" id="legend-failed-pct">(0%)</span>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-info">
+                        <span class="legend-dot processing"></span>
+                        <span>Processing</span>
+                      </div>
+                      <div>
+                        <span class="legend-count" id="legend-processing-count">0</span>
+                        <span class="legend-pct" id="legend-processing-pct">(0%)</span>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-info">
+                        <span class="legend-dot queued"></span>
+                        <span>Queued</span>
+                      </div>
+                      <div>
+                        <span class="legend-count" id="legend-queued-count">0</span>
+                        <span class="legend-pct" id="legend-queued-pct">(0%)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Recent Activity</h3>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" id="recent-activity-list">
+                  <!-- Injected via app.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Latest Jobs Table Card -->
+          <div class="card">
+            <div class="card-header" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <h3 class="card-title">Latest Jobs</h3>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-secondary btn-sm" id="btn-seed-test-cases-dash" title="Run / Seed all 3 test case scenarios: All Pass, Some Failed, All Failed">
+                  🧪 Seed Test Scenarios
+                </button>
+                <a class="card-header-link" onclick="switchView('job-status')">View All →</a>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Job Name</th>
+                    <th>Recipients</th>
+                    <th>Success</th>
+                    <th>Failed</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="latest-jobs-tbody">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 2: Bulk Certificate Generation Wizard             -->
+        <!-- ======================================================== -->
+        <section id="view-bulk-gen" class="view-section">
+          <!-- 3-Step Wizard Navigation -->
+          <div class="wizard-stepper">
+            <div class="step-item active" data-step="1">
+              <div class="step-number">1</div>
+              <span>Upload & Details</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="2">
+              <div class="step-number">2</div>
+              <span>Review & Validate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="3">
+              <div class="step-number">3</div>
+              <span>Submit & Progress</span>
+            </div>
+          </div>
+
+          <!-- Step 1: Upload & Details -->
+          <div id="wizard-step-1">
+            <div class="bulk-form-grid">
+              <!-- Left Column: Job Info -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Job Information</h3>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="wizard-job-name">Job Name <span class="required">*</span></label>
+                    <input type="text" id="wizard-job-name" class="form-control"
+                      placeholder="e.g. Python Training Program">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="wizard-course-name">Course Name <span class="required">*</span></label>
+                    <input type="text" id="wizard-course-name" class="form-control"
+                      placeholder="e.g. Python Programming & Architecture">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="wizard-completion-date">Completion Date <span class="required">*</span></label>
+                    <input type="date" id="wizard-completion-date" class="form-control">
+                  </div>
+
+                  <!-- CSV Format Guidance Box -->
+                  <div class="format-guide-box">
+                    <h4>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                      </svg>
+                      CSV Format Instructions
+                    </h4>
+                    <ul>
+                      <li>Required columns: <code>name</code>, <code>email</code></li>
+                      <li>Optional columns: <code>grade</code>, <code>honors</code>, <code>organization</code></li>
+                      <li>Maximum recommended 10,000 recipients per batch</li>
+                      <li>Encoding: UTF-8 standard CSV</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Upload Recipients -->
+              <div class="card">
+                <div class="card-header" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                  <h3 class="card-title">Upload Recipients</h3>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-all-pass" title="Load Test Scenario 1: All certificates pass">
+                      🟢 All Pass (4)
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-some-fail" title="Load Test Scenario 2: Some certificates fail, others pass">
+                      🟡 Some Failed (5)
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-all-fail" title="Load Test Scenario 3: All certificates fail">
+                      🔴 All Failed (3)
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <input type="file" id="csv-file-input" accept=".csv" style="display:none;">
+                  <div class="dropzone" id="csv-dropzone">
+                    <div class="dropzone-icon">
+                      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                    </div>
+                    <div class="dropzone-title">Drag & drop a CSV file here</div>
+                    <div class="dropzone-subtext">Supported format: CSV (Max 10MB)</div>
+                    <button type="button" class="btn btn-secondary btn-sm">Browse Files</button>
+                  </div>
+
+                  <div class="sample-csv-action">
+                    <span>Need an example CSV?</span>
+                    <button type="button" class="btn-link" id="btn-download-sample-csv">↓ Download Sample CSV</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;">
+              <button class="btn btn-primary" id="btn-next-review">Next: Review →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Review & Validate -->
+          <div id="wizard-step-2" style="display:none;">
+            <div class="review-box">
+              <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Recipient Data Validation Review</h3>
+              <p style="font-size:13px;color:var(--text-secondary);margin-bottom:18px;">
+                Review recipients parsed from your input. Valid recipients will be generated into PDF certificates.
+              </p>
+
+              <div class="review-summary-pills">
+                <div class="summary-pill valid">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span id="review-valid-count">0 Valid Recipients</span>
+                </div>
+                <div class="summary-pill invalid">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span id="review-invalid-count">0 Invalid Entries</span>
+                </div>
+              </div>
+
+              <div class="table-responsive"
+                style="max-height:360px;overflow-y:auto;border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Recipient Name</th>
+                      <th>Email Address</th>
+                      <th>Course / Event</th>
+                      <th>Validation Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="review-table-tbody">
+                    <!-- Injected via app.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:24px;">
+                <button class="btn btn-secondary" id="btn-back-step1">← Back to Details</button>
+                <button class="btn btn-primary" id="btn-start-generation">Start Certificate Generation 🚀</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Generation Progress -->
+          <div id="wizard-step-3" style="display:none;">
+            <div class="review-box" style="text-align:center;padding:48px 24px;">
+              <div style="font-size:36px;margin-bottom:12px;">⚙️</div>
+              <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">Bulk Certificate Processing</h2>
+              <p style="font-size:13.5px;color:var(--text-secondary);max-width:540px;margin:0 auto 24px;">
+                Each certificate is being independently drawn and rendered with ornamental gold borders, typography, and
+                QR code verification.
+              </p>
+
+              <div style="max-width:520px;margin:0 auto 20px;">
+                <div
+                  style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;">
+                  <span>Generation Progress</span>
+                  <span id="wizard-progress-pct">0%</span>
+                </div>
+                <div class="progress-bar-container" style="height:12px;">
+                  <div class="progress-bar-fill" id="wizard-progress-bar" style="width:0%;"></div>
+                </div>
+              </div>
+
+              <div
+                style="display:inline-flex;gap:20px;background:#f8fafc;padding:12px 24px;border-radius:var(--radius-full);margin-bottom:28px;border:1px solid var(--border-color);">
+                <div>Status: <span id="wizard-job-status-badge" class="badge processing">Processing</span></div>
+                <div>Total: <strong id="wizard-total-count">0</strong></div>
+                <div>Success: <strong id="wizard-success-count" style="color:var(--success);">0</strong></div>
+                <div>Failed: <strong id="wizard-failed-count" style="color:var(--danger);">0</strong></div>
+              </div>
+
+              <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="wizard-download-zip-btn" style="display:none;">
+                  📦 Download PDF ZIP
+                </button>
+                <button class="btn btn-secondary" id="wizard-download-png-zip-btn" style="display:none;">
+                  🖼️ Download PNG ZIP
+                </button>
+                <button class="btn btn-secondary" onclick="switchView('job-status')">
+                  View in Job Status Table
+                </button>
+                <button class="btn btn-secondary" id="btn-reset-wizard">
+                  Create Another Batch
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 3: Job Status & Progress View                     -->
+        <!-- ======================================================== -->
+        <section id="view-job-status" class="view-section">
+          <!-- Metric Filter Pills -->
+          <div class="status-metric-pills">
+            <div class="metric-pill active" data-filter="all">
+              <span>Total Jobs</span>
+              <span class="metric-count" id="filter-pill-total">0</span>
+            </div>
+            <div class="metric-pill" data-filter="completed">
+              <span>Completed (100% Pass)</span>
+              <span class="metric-count" id="filter-pill-completed">0</span>
+            </div>
+            <div class="metric-pill" data-filter="partially_completed">
+              <span>Partial (Some Failed)</span>
+              <span class="metric-count" id="filter-pill-partial">0</span>
+            </div>
+            <div class="metric-pill" data-filter="failed">
+              <span>Failed (All Failed)</span>
+              <span class="metric-count" id="filter-pill-failed">0</span>
+            </div>
+            <div class="metric-pill" data-filter="processing">
+              <span>Processing</span>
+              <span class="metric-count" id="filter-pill-processing">0</span>
+            </div>
+            <div class="metric-pill" data-filter="pending">
+              <span>Queued</span>
+              <span class="metric-count" id="filter-pill-queued">0</span>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" id="jobs-search-input" class="form-control" placeholder="Search jobs by name or ID...">
+            </div>
+
+            <select id="jobs-status-select" class="form-control" style="width:210px;">
+              <option value="all">All Status</option>
+              <option value="completed">Completed (100% Pass)</option>
+              <option value="partially_completed">Partially Completed (Some Failed)</option>
+              <option value="failed">Failed (All Failed)</option>
+              <option value="processing">Processing</option>
+              <option value="pending">Queued / Pending</option>
+            </select>
+
+            <button class="btn btn-secondary" id="jobs-refresh-btn" title="Refresh jobs table">
+              🔄 Refresh
+            </button>
+            <button class="btn btn-primary" id="btn-seed-test-cases-jobs" title="Seed / Run all 3 test case scenarios: All Pass, Some Failed, All Failed">
+              🧪 Seed Test Scenarios
+            </button>
+          </div>
+
+          <!-- Jobs Table Card -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Job Name</th>
+                    <th>Total</th>
+                    <th>Success</th>
+                    <th>Failed</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-table-tbody">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Selected Job Detail Drill-down Drawer -->
+          <div class="job-detail-drawer" id="job-detail-drawer" style="display:none;">
+            <div class="drawer-header">
+              <div>
+                <h3 style="font-size:16px;font-weight:700;" id="drawer-job-title">Job Details</h3>
+                <p style="font-size:12.5px;color:var(--text-secondary);margin-top:2px;">Individual recipient outcomes
+                  and certificate downloads</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span id="drawer-status-badge" class="badge completed">COMPLETED</span>
+                <button class="btn btn-primary btn-sm" id="drawer-download-zip-btn" style="display:none;"
+                  title="Download all certificates as PDF in ZIP">
+                  📦 PDF ZIP
+                </button>
+                <button class="btn btn-secondary btn-sm" id="drawer-download-png-zip-btn" style="display:none;"
+                  title="Download all certificates as PNG in ZIP">
+                  🖼️ PNG ZIP
+                </button>
+                <button class="btn btn-secondary btn-sm"
+                  onclick="document.getElementById('job-detail-drawer').style.display='none'">✕ Close</button>
+              </div>
+            </div>
+
+            <div class="drawer-stats-row">
+              <div>
+                <span class="stat-label">Total Recipients</span>
+                <div style="font-size:20px;font-weight:700;margin-top:4px;" id="drawer-total">0</div>
+              </div>
+              <div>
+                <span class="stat-label">Successful</span>
+                <div style="font-size:20px;font-weight:700;color:var(--success);margin-top:4px;" id="drawer-success">0
+                </div>
+              </div>
+              <div>
+                <span class="stat-label">Failed</span>
+                <div style="font-size:20px;font-weight:700;color:var(--danger);margin-top:4px;" id="drawer-failed">0
+                </div>
+              </div>
+              <div>
+                <span class="stat-label">Completion Progress</span>
+                <div style="font-size:20px;font-weight:700;color:var(--primary);margin-top:4px;" id="drawer-progress">0%
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;display:flex;gap:20px;">
+              <span>Created: <strong id="drawer-created">N/A</strong></span>
+              <span>Completed: <strong id="drawer-completed">N/A</strong></span>
+            </div>
+
+            <div class="table-responsive"
+              style="max-height:280px;overflow-y:auto;border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Cert ID / Code</th>
+                    <th>Recipient Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Failure Reason</th>
+                    <th>Download Options</th>
+                  </tr>
+                </thead>
+                <tbody id="drawer-recipients-tbody">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 4: Certificate Management View                    -->
+        <!-- ======================================================== -->
+        <section id="view-certificates" class="view-section">
+          <!-- Search and Filter Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" id="cert-search-input" class="form-control"
+                placeholder="Search by recipient name, email or cert ID...">
+            </div>
+
+            <select id="cert-job-select" class="form-control" style="width:200px;">
+              <option value="all">All Jobs</option>
+            </select>
+
+            <select id="cert-status-select" class="form-control" style="width:160px;">
+              <option value="all">All Status</option>
+              <option value="SUCCESS">Success</option>
+              <option value="FAILED">Failed</option>
+              <option value="PENDING">Pending</option>
+            </select>
+
+            <button class="btn btn-primary" id="cert-search-btn">
+              🔍 Search
+            </button>
+          </div>
+
+          <!-- Two Column Grid: Table + Live Preview -->
+          <div class="certificate-mgmt-grid">
+            <!-- Left: Certificates Table -->
+            <div class="card">
+              <div class="table-responsive">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Cert ID</th>
+                      <th>Recipient Name</th>
+                      <th>Email</th>
+                      <th>Job / Course</th>
+                      <th>Status</th>
+                      <th>Certificate</th>
+                      <th>Generated At</th>
+                    </tr>
+                  </thead>
+                  <tbody id="certificates-table-tbody">
+                    <!-- Injected via app.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination Bar -->
+              <div class="pagination-wrap" style="padding:14px 20px;">
+                <span id="cert-total-label" style="font-size:12.5px;color:var(--text-secondary);">Showing 0 of 0
+                  certificates</span>
+                <div class="pagination-controls" id="cert-pagination-controls">
+                  <!-- Injected via app.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Certificate Preview Card -->
+            <div class="certificate-preview-card">
+              <h4 style="font-size:14px;font-weight:700;margin-bottom:14px;">Certificate Preview</h4>
+
+              <!-- Visual Certificate Miniature -->
+              <div class="certificate-visual-mock">
+                <div class="mock-issuer">GLOBAL CERTIFICATION AUTHORITY</div>
+                <div class="mock-title">CERTIFICATE OF ACHIEVEMENT</div>
+                <div style="font-size:7px;color:#64748b;">THIS IS PRESENTED TO</div>
+                <div class="mock-recipient" id="preview-recipient-name">Rahul Sharma</div>
+                <div class="mock-course" id="preview-course-title">Python Programming</div>
+
+                <div class="mock-footer">
+                  <div>
+                    <div>VERIFIED ID</div>
+                    <div style="font-weight:700;" id="preview-code">CERT-891-2318</div>
+                  </div>
+                  <div
+                    style="width:28px;height:28px;border:1px solid #0f172a;display:flex;align-items:center;justify-content:center;font-size:8px;">
+                    QR
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview-meta-row">
+                <div class="preview-meta-item">
+                  <span class="label">Recipient Name:</span>
+                  <span class="val" id="preview-meta-name">Rahul Sharma</span>
+                </div>
+                <div class="preview-meta-item">
+                  <span class="label">Course:</span>
+                  <span class="val" id="preview-meta-course">Python Programming</span>
+                </div>
+                <div class="preview-meta-item">
+                  <span class="label">Issue Date:</span>
+                  <span class="val" id="preview-meta-date">October 11, 2026</span>
+                </div>
+                <div class="preview-meta-item">
+                  <span class="label">Certificate ID:</span>
+                  <span class="val" id="preview-meta-id">CERT-891-2318</span>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="btn btn-primary" id="preview-download-btn" style="flex:1;"
+                  title="Download certificate in PDF format">
+                  📥 Download PDF
+                </button>
+                <button class="btn btn-secondary" id="preview-download-png-btn" style="flex:1;"
+                  title="Download certificate in PNG image format">
+                  🖼️ Download PNG
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div> <!-- End #app-layout -->
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+
+</html>
